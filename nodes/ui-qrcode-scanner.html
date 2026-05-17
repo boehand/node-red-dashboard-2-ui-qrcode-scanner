@@ -1,0 +1,162 @@
+<script type="text/javascript">
+    RED.nodes.registerType('ui-qrcode-scanner', {
+        category: RED._('@flowfuse/node-red-dashboard/ui-base:ui-base.label.category'),
+        color: RED._('@flowfuse/node-red-dashboard/ui-base:ui-base.colors.light'),
+        defaults: {
+            name: { value: '' },
+            group: { type: 'ui-group', required: true },
+            order: { value: 0 },
+            width: {
+                value: 0,
+                validate: function (v) {
+                    const width = v || 0
+                    const currentGroup = $('#node-input-group').val() || this.group
+                    const groupNode = RED.nodes.node(currentGroup)
+                    const valid = !groupNode || +width <= +groupNode.width
+                    $('#node-input-size').toggleClass('input-error', !valid)
+                    return valid
+                }
+            },
+            height: { value: 0 },
+            fps: { value: 10, validate: RED.validators.number() },
+            qrboxWidth: { value: 250, validate: RED.validators.number() },
+            qrboxHeight: { value: 250, validate: RED.validators.number() },
+            aspectRatio: { value: '' },
+            cameraFacingMode: { value: 'environment' },
+            autoStart: { value: true },
+            stopOnScan: { value: false },
+            hideControls: { value: false },
+            showTorch: { value: false },
+            disableFlip: { value: false },
+            startLabel: { value: 'Start scanning' },
+            stopLabel: { value: 'Stop scanning' }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: 'font-awesome/fa-qrcode',
+        paletteLabel: 'qr-code scanner',
+        label: function () {
+            return this.name || 'qr-code scanner'
+        },
+        oneditprepare: function () {
+            $('#node-input-size').elementSizer({
+                width: '#node-input-width',
+                height: '#node-input-height',
+                group: '#node-input-group'
+            })
+        }
+    })
+</script>
+
+<script type="text/html" data-template-name="ui-qrcode-scanner">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-group"><i class="fa fa-table"></i> Group</label>
+        <input type="text" id="node-input-group">
+    </div>
+    <div class="form-row">
+        <label><i class="fa fa-object-group"></i> Size</label>
+        <input type="hidden" id="node-input-width">
+        <input type="hidden" id="node-input-height">
+        <button class="editor-button" id="node-input-size"></button>
+    </div>
+
+    <hr/>
+
+    <div class="form-row">
+        <label for="node-input-cameraFacingMode"><i class="fa fa-camera"></i> Camera</label>
+        <select id="node-input-cameraFacingMode" style="width:70%">
+            <option value="environment">Rear (environment)</option>
+            <option value="user">Front (user)</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-fps"><i class="fa fa-tachometer"></i> FPS</label>
+        <input type="number" id="node-input-fps" min="1" max="60" style="width:70%">
+    </div>
+    <div class="form-row">
+        <label for="node-input-qrboxWidth"><i class="fa fa-arrows-h"></i> QR-Box W</label>
+        <input type="number" id="node-input-qrboxWidth" min="0" style="width:70%">
+    </div>
+    <div class="form-row">
+        <label for="node-input-qrboxHeight"><i class="fa fa-arrows-v"></i> QR-Box H</label>
+        <input type="number" id="node-input-qrboxHeight" min="0" style="width:70%">
+    </div>
+    <div class="form-row">
+        <label for="node-input-aspectRatio"><i class="fa fa-television"></i> Aspect</label>
+        <input type="text" id="node-input-aspectRatio" placeholder="e.g. 1.7778 (16:9) – leave empty for auto" style="width:70%">
+    </div>
+
+    <hr/>
+
+    <div class="form-row">
+        <label for="node-input-autoStart" style="width:auto">
+            <input type="checkbox" id="node-input-autoStart" style="display:inline-block; width:auto; vertical-align:top; margin-right:4px;">
+            Start scanner automatically when widget loads
+        </label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-stopOnScan" style="width:auto">
+            <input type="checkbox" id="node-input-stopOnScan" style="display:inline-block; width:auto; vertical-align:top; margin-right:4px;">
+            Stop scanner after each successful scan
+        </label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-hideControls" style="width:auto">
+            <input type="checkbox" id="node-input-hideControls" style="display:inline-block; width:auto; vertical-align:top; margin-right:4px;">
+            Hide start/stop controls
+        </label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-showTorch" style="width:auto">
+            <input type="checkbox" id="node-input-showTorch" style="display:inline-block; width:auto; vertical-align:top; margin-right:4px;">
+            Show torch toggle (if supported)
+        </label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-disableFlip" style="width:auto">
+            <input type="checkbox" id="node-input-disableFlip" style="display:inline-block; width:auto; vertical-align:top; margin-right:4px;">
+            Disable mirrored scanning (disableFlip)
+        </label>
+    </div>
+
+    <hr/>
+
+    <div class="form-row">
+        <label for="node-input-startLabel"><i class="fa fa-play"></i> Start label</label>
+        <input type="text" id="node-input-startLabel" style="width:70%">
+    </div>
+    <div class="form-row">
+        <label for="node-input-stopLabel"><i class="fa fa-stop"></i> Stop label</label>
+        <input type="text" id="node-input-stopLabel" style="width:70%">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="ui-qrcode-scanner">
+    <p>A Dashboard 2.0 widget that scans QR codes and barcodes using the device camera,
+       powered by the <a href="https://github.com/mebjas/html5-qrcode" target="_blank">html5-qrcode</a> library.</p>
+
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">string</span></dt>
+        <dd>The decoded text of the scanned code.</dd>
+        <dt>qrcode <span class="property-type">object</span></dt>
+        <dd>The raw decoded result, including the detected <code>format</code>.</dd>
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>Always set to <code>qrcode</code>.</dd>
+    </dl>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt class="optional">action <span class="property-type">string</span></dt>
+        <dd>One of <code>start</code>, <code>stop</code>, <code>toggle</code>, <code>torchOn</code>, <code>torchOff</code>.</dd>
+        <dt class="optional">ui_update <span class="property-type">object</span></dt>
+        <dd>Override widget configuration at runtime, e.g. <code>{ fps: 15, cameraFacingMode: 'user' }</code>.</dd>
+    </dl>
+
+    <h3>Notes</h3>
+    <p>Camera access requires HTTPS (or <code>http://localhost</code>) and the user must grant permission.</p>
+</script>
