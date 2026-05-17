@@ -1,7 +1,14 @@
-# node-red-contrib-html5-qrcode-scanner
+# node-red-dashboard-2-ui-qrcode-scanner
 
 A QR-code / barcode scanner widget for [Node-RED Dashboard 2.0](https://dashboard.flowfuse.com/),
 powered by [html5-qrcode](https://github.com/mebjas/html5-qrcode).
+
+> **Note on the package name:** Dashboard 2.0 only auto-detects third-party
+> widgets whose npm package name contains `node-red-dashboard-2-`
+> (see [`getThirdPartyWidgets`](https://github.com/FlowFuse/node-red-dashboard/blob/main/nodes/utils/index.js)).
+> The npm package is therefore published as
+> `node-red-dashboard-2-ui-qrcode-scanner`, even though the GitHub repo is
+> `node-red-contrib-html5-qrcode-scanner`.
 
 The widget renders a live camera preview inside a Dashboard 2.0 group and emits a
 Node-RED message every time a code is decoded.
@@ -23,11 +30,25 @@ Node-RED message every time a code is decoded.
 From your Node-RED user directory (usually `~/.node-red`):
 
 ```bash
-npm install node-red-contrib-html5-qrcode-scanner
+npm install node-red-dashboard-2-ui-qrcode-scanner
 ```
 
 Then restart Node-RED. A new node **`qr-code scanner`** appears in the
 **dashboard 2** category.
+
+### Installing from source
+
+```bash
+cd ~/.node-red
+npm install /path/to/checkout-of-node-red-contrib-html5-qrcode-scanner
+```
+
+This puts an entry in `~/.node-red/package.json` whose key is
+`node-red-dashboard-2-ui-qrcode-scanner`, which is what Dashboard 2
+scans for. If you previously installed the package under the
+`node-red-contrib-html5-qrcode-scanner` name, uninstall it first
+(`npm uninstall node-red-contrib-html5-qrcode-scanner`) or the widget
+will continue to fall back to `ui-template`.
 
 > ⚠️ Camera access requires the dashboard to be served over **HTTPS**
 > (or accessed via `http://localhost`). Mobile browsers will not enable
