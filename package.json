@@ -1,0 +1,77 @@
+{
+    "name": "node-red-contrib-html5-qrcode-scanner",
+    "version": "0.1.0",
+    "description": "A QR-Code / Barcode scanner widget for Node-RED Dashboard 2.0, powered by html5-qrcode.",
+    "keywords": [
+        "node-red",
+        "node-red-dashboard-2",
+        "qrcode",
+        "qr-code",
+        "barcode",
+        "scanner",
+        "html5-qrcode",
+        "camera"
+    ],
+    "homepage": "https://github.com/boehand/node-red-contrib-html5-qrcode-scanner",
+    "bugs": {
+        "url": "https://github.com/boehand/node-red-contrib-html5-qrcode-scanner/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/boehand/node-red-contrib-html5-qrcode-scanner.git"
+    },
+    "license": "Apache-2.0",
+    "author": {
+        "name": "boehand"
+    },
+    "exports": {
+        "import": "./resources/ui-qrcode-scanner.esm.js",
+        "require": "./resources/ui-qrcode-scanner.umd.js"
+    },
+    "files": [
+        "nodes/*",
+        "ui/*",
+        "resources/*",
+        "examples/*",
+        "README.md",
+        "LICENSE"
+    ],
+    "scripts": {
+        "build": "vite build",
+        "build:dev": "NODE_ENV=development vite build",
+        "dev": "NODE_ENV=development vite build --watch"
+    },
+    "dependencies": {
+        "html5-qrcode": "^2.3.8"
+    },
+    "devDependencies": {
+        "@vitejs/plugin-vue": "^4.5.0",
+        "vite": "^5.0.13",
+        "vite-plugin-css-injected-by-js": "^3.3.0",
+        "vite-plugin-static-copy": "^1.0.6",
+        "vue": "^3.3.8",
+        "vuex": "^4.1.0"
+    },
+    "peerDependencies": {
+        "vue": "^3.3.0",
+        "vuex": "^4.1.0"
+    },
+    "engines": {
+        "node": ">=14"
+    },
+    "node-red": {
+        "version": ">=3.0.0",
+        "nodes": {
+            "ui-qrcode-scanner": "nodes/ui-qrcode-scanner.js"
+        }
+    },
+    "node-red-dashboard-2": {
+        "version": ">=1.0.0",
+        "widgets": {
+            "ui-qrcode-scanner": {
+                "output": "ui-qrcode-scanner.umd.js",
+                "component": "UIQrCodeScanner"
+            }
+        }
+    }
+}
