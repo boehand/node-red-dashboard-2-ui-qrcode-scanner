@@ -3,6 +3,8 @@
 A QR-code / barcode scanner widget for [Node-RED Dashboard 2.0](https://dashboard.flowfuse.com/),
 powered by [html5-qrcode](https://github.com/mebjas/html5-qrcode).
 
+![Demo](docs/video_node-red-dashboard-2-ui-qrcode-scanner.webp)
+
 > **Note on the package name:** Dashboard 2.0 only auto-detects third-party
 > widgets whose npm package name contains `node-red-dashboard-2-`
 > (see [`getThirdPartyWidgets`](https://github.com/FlowFuse/node-red-dashboard/blob/main/nodes/utils/index.js)).
@@ -87,6 +89,11 @@ msg = { action: 'torchOff' }
 // Change configuration on the fly
 msg = { ui_update: { fps: 15, cameraFacingMode: 'user', stopOnScan: true } }
 ```
+
+
+
+![Demo](docs/screenshot_node-red-dashboard-2-ui-qrcode-scanner.png)
+
 
 ## Configuration
 

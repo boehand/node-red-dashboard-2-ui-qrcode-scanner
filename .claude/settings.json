@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(node -e \"const p=require\\('./node_modules/html5-qrcode/package.json'\\);console.log\\(p.version\\)\")",
+      "Bash(python -c \"import sys,json;p=json.load\\(sys.stdin\\);print\\(p.get\\('dependencies',{}\\)\\)\")",
+      "Bash(python -c \"import sys; lines=[l.strip\\(\\) for l in sys.stdin]; print\\([l for l in lines if 'html' in l.lower\\(\\) or 'qr' in l.lower\\(\\)]\\)\")",
+      "Bash(python -c \"import sys; [print\\(l.strip\\(\\)\\) for l in sys.stdin]\")",
+      "Bash(python -c \"import subprocess; r=subprocess.run\\(['dir', '/b', 'c:\\\\\\\\Allgemeiner_Ordner\\\\\\\\node-red\\\\\\\\NODES_DEVELOPMENT\\\\\\\\node-red-html5-sensor-nodes\\\\\\\\installedLocalNodes\\\\\\\\node-red-dashboard-2-ui-qrcode-scanner\\\\\\\\node_modules'], capture_output=True, text=True, shell=True\\); print\\(r.stdout\\)\")",
+      "PowerShell(Get-ChildItem \"c:\\\\Allgemeiner_Ordner\\\\node-red\\\\NODES_DEVELOPMENT\\\\node-red-html5-sensor-nodes\\\\installedLocalNodes\\\\node-red-dashboard-2-ui-qrcode-scanner\\\\node_modules\" -Name | Where-Object { $_ -match \"html|qr\" })"
     ]
   }
 }

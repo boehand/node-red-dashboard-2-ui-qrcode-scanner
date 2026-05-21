@@ -6,3 +6,5 @@ resources/*.map
 .DS_Store
 *.log
 .vscode/
+docs/video1.mp4
+docs/video2.mp4

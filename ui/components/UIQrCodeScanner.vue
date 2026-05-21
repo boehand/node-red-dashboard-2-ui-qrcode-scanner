@@ -234,15 +234,11 @@ export default {
             const readerId = this.readerId
             const config = {
                 fps: this.fps,
-                // viewfinderWidth/Height from html5-qrcode is the camera resolution,
-                // not the CSS container size – so we read the container from the DOM.
-                qrbox: () => {
-                    const el = document.getElementById(readerId)
-                    const w = el ? el.clientWidth : 300
-                    // clientHeight may be 0 before the video fills the container;
-                    // fall back to the 4:3 ratio of the width.
-                    const h = el && el.clientHeight > 0 ? el.clientHeight : w * 0.75
-                    const size = Math.max(50, Math.floor(Math.min(w, h) * 0.8))
+                // viewfinderWidth/Height are the CSS pixel dimensions of the rendered
+                // video element, measured by html5-qrcode at onLoadedMetadata time –
+                // more reliable than reading clientWidth/clientHeight at start() time.
+                qrbox: (viewfinderWidth, viewfinderHeight) => {
+                    const size = Math.max(50, Math.floor(Math.min(viewfinderWidth, viewfinderHeight) * 0.8))
                     return { width: size, height: size }
                 },
                 disableFlip: this.disableFlip
@@ -264,6 +260,12 @@ export default {
                 )
                 this.scanning = true
                 this.detectTorchSupport()
+                // Best-effort continuous autofocus – silently ignored if unsupported
+                if (typeof this.html5QrCode.applyVideoConstraints === 'function') {
+                    this.html5QrCode.applyVideoConstraints({
+                        advanced: [{ focusMode: 'continuous' }]
+                    }).catch(() => {})
+                }
             } catch (err) {
                 this.errorMessage = `Failed to start scanner: ${err && err.message ? err.message : err}`
                 this.emitError(this.errorMessage)
@@ -409,4 +411,18 @@ export default {
 
 <style scoped>
 @import "../stylesheets/ui-qrcode-scanner.css";
+
+/* html5-qrcode injects a <section> and <video> dynamically – they don't get
+   Vue's scoped data attribute, so :deep() is required for the rules to match. */
+.ui-qrcode-scanner-reader :deep(section) {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.ui-qrcode-scanner-reader :deep(video) {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+}
 </style>
