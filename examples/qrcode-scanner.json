@@ -7,46 +7,117 @@
         "info": "# QR-Code Scanner example\n\nOpen `/dashboard` and grant camera permission.\nScan any QR code or supported barcode – the decoded text is logged in the debug sidebar and shown in a text widget.\n\nThe text widget at the bottom sends `{ action: 'start' }` / `{ action: 'stop' }` so you can also control the scanner programmatically."
     },
     {
-        "id": "ui.base",
-        "type": "ui-base",
-        "name": "My Dashboard",
-        "path": "/dashboard",
-        "appIcon": "",
-        "includeClientData": true,
-        "acceptsClientConfig": [],
-        "showPathInSidebar": false
-    },
-    {
-        "id": "ui.page",
-        "type": "ui-page",
-        "name": "Scanner",
-        "ui": "ui.base",
-        "path": "/scanner",
-        "icon": "qrcode-scan",
-        "layout": "grid",
-        "theme": "ui.theme",
+        "id": "n.scanner",
+        "type": "ui-qrcode-scanner",
+        "z": "f.qrscan",
+        "name": "QR Scanner",
+        "group": "ui.group.scan",
         "order": 1,
-        "className": "",
-        "visible": true,
-        "disabled": false
+        "width": 6,
+        "height": 6,
+        "fps": 10,
+        "qrboxWidth": 250,
+        "qrboxHeight": 250,
+        "aspectRatio": "",
+        "cameraFacingMode": "environment",
+        "autoStart": true,
+        "stopOnScan": false,
+        "hideControls": false,
+        "showTorch": true,
+        "disableFlip": false,
+        "startLabel": "Start scanning",
+        "stopLabel": "Stop scanning",
+        "x": 310,
+        "y": 100,
+        "wires": [
+            [
+                "n.debug",
+                "n.text"
+            ]
+        ]
     },
     {
-        "id": "ui.theme",
-        "type": "ui-theme",
-        "name": "Default",
-        "colors": {
-            "surface": "#ffffff",
-            "primary": "#0094CE",
-            "bgPage": "#eeeeee",
-            "groupBg": "#ffffff",
-            "groupOutline": "#cccccc"
-        },
-        "sizes": {
-            "pagePadding": "12px",
-            "groupGap": "12px",
-            "groupBorderRadius": "4px",
-            "widgetGap": "12px"
-        }
+        "id": "n.debug",
+        "type": "debug",
+        "z": "f.qrscan",
+        "name": "scanned",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 480,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "n.text",
+        "type": "ui-text",
+        "z": "f.qrscan",
+        "group": "ui.group.result",
+        "order": 1,
+        "width": 6,
+        "height": 1,
+        "name": "Last scan",
+        "label": "Last scan:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 480,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "n.inject.start",
+        "type": "inject",
+        "z": "f.qrscan",
+        "name": "Start",
+        "props": [
+            {
+                "p": "action",
+                "v": "start",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "x": 130,
+        "y": 100,
+        "wires": [
+            [
+                "n.scanner"
+            ]
+        ]
+    },
+    {
+        "id": "n.inject.stop",
+        "type": "inject",
+        "z": "f.qrscan",
+        "name": "Stop",
+        "props": [
+            {
+                "p": "action",
+                "v": "stop",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "x": 130,
+        "y": 150,
+        "wires": [
+            [
+                "n.scanner"
+            ]
+        ]
     },
     {
         "id": "ui.group.scan",
@@ -75,87 +146,64 @@
         "disabled": false
     },
     {
-        "id": "n.scanner",
-        "type": "ui-qrcode-scanner",
-        "z": "f.qrscan",
-        "group": "ui.group.scan",
-        "name": "QR Scanner",
+        "id": "ui.page",
+        "type": "ui-page",
+        "name": "Scanner",
+        "ui": "e5af74961b90d9d0",
+        "path": "/scanner",
+        "icon": "qrcode-scan",
+        "layout": "grid",
+        "theme": "ui.theme",
         "order": 1,
-        "width": 6,
-        "height": 6,
-        "fps": 10,
-        "qrboxWidth": 250,
-        "qrboxHeight": 250,
-        "aspectRatio": "",
-        "cameraFacingMode": "environment",
-        "autoStart": true,
-        "stopOnScan": false,
-        "hideControls": false,
-        "showTorch": true,
-        "disableFlip": false,
-        "startLabel": "Start scanning",
-        "stopLabel": "Stop scanning",
-        "wires": [["n.debug", "n.text"]]
+        "className": "",
+        "visible": true,
+        "disabled": false
     },
     {
-        "id": "n.debug",
-        "type": "debug",
-        "z": "f.qrscan",
-        "name": "scanned",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 540,
-        "y": 100,
-        "wires": []
+        "id": "e5af74961b90d9d0",
+        "type": "ui-base",
+        "name": "My Dashboard",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "headerContent": "page",
+        "navigationStyle": "default",
+        "titleBarStyle": "default",
+        "showReconnectNotification": true,
+        "notificationDisplayTime": 1,
+        "showDisconnectNotification": true,
+        "allowInstall": false
     },
     {
-        "id": "n.text",
-        "type": "ui-text",
-        "z": "f.qrscan",
-        "group": "ui.group.result",
-        "order": 1,
-        "width": 6,
-        "height": 1,
-        "name": "Last scan",
-        "label": "Last scan:",
-        "format": "{{msg.payload}}",
-        "layout": "row-spread",
-        "style": false,
-        "font": "",
-        "fontSize": 16,
-        "color": "#000000",
-        "wires": [[]]
+        "id": "ui.theme",
+        "type": "ui-theme",
+        "name": "Default",
+        "colors": {
+            "surface": "#ffffff",
+            "primary": "#0094CE",
+            "bgPage": "#eeeeee",
+            "groupBg": "#ffffff",
+            "groupOutline": "#cccccc"
+        },
+        "sizes": {
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
     },
     {
-        "id": "n.inject.start",
-        "type": "inject",
-        "z": "f.qrscan",
-        "name": "Start",
-        "props": [{ "p": "action", "v": "start", "vt": "str" }],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "x": 150,
-        "y": 220,
-        "wires": [["n.scanner"]]
-    },
-    {
-        "id": "n.inject.stop",
-        "type": "inject",
-        "z": "f.qrscan",
-        "name": "Stop",
-        "props": [{ "p": "action", "v": "stop", "vt": "str" }],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "x": 150,
-        "y": 270,
-        "wires": [["n.scanner"]]
+        "id": "36fbed57beb8384d",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-dashboard-2-ui-qrcode-scanner": "0.1.1",
+            "@flowfuse/node-red-dashboard": "1.30.2"
+        }
     }
 ]
