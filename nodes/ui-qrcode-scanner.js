@@ -5,10 +5,7 @@ module.exports = function (RED) {
         const node = this
 
         const group = RED.nodes.getNode(config.group)
-        if (!group) {
-            node.error('No group configured')
-            return
-        }
+
         const base = group.getBase()
 
         // Properties that can be overridden at runtime via msg.ui_update.<name>
@@ -50,6 +47,8 @@ module.exports = function (RED) {
 
         if (group) {
             group.register(node, config, evts)
+        } else {
+            node.error('No group configured')
         }
     }
 

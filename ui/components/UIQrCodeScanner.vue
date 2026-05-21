@@ -1,13 +1,13 @@
 <template>
     <div class="ui-qrcode-scanner-wrapper">
-        <div :id="readerId" class="ui-qrcode-scanner-reader">
-            <div v-if="!scanning && !errorMessage" class="ui-qrcode-scanner-placeholder">
-                Scanner stopped
-            </div>
+        <!-- html5-qrcode owns this div entirely – no Vue children inside -->
+        <div :id="readerId" class="ui-qrcode-scanner-reader"></div>
+
+        <div v-if="!scanning && !errorMessage" class="ui-qrcode-scanner-placeholder">
+            Scanner stopped
         </div>
 
         <div v-if="!hideControls" class="ui-qrcode-scanner-controls">
-            <!-- Single button that toggles between start/stop -->
             <v-btn
                 :color="scanning ? 'error' : 'primary'"
                 :prepend-icon="scanning ? 'mdi-stop' : 'mdi-camera'"
@@ -17,7 +17,6 @@
                 {{ scanning ? stopLabel : startLabel }}
             </v-btn>
 
-            <!-- Camera selector - only shown when not scanning -->
             <v-select
                 v-if="cameras.length > 1 && !scanning"
                 v-model="selectedCameraId"
@@ -30,7 +29,6 @@
                 variant="outlined"
             />
 
-            <!-- Torch button - only shown when scanning if supported -->
             <v-btn
                 v-if="scanning && showTorch && torchSupported"
                 :color="torchOn ? 'warning' : undefined"
@@ -41,12 +39,10 @@
             </v-btn>
         </div>
 
-        <!-- Result display -->
         <div v-if="lastResult" class="ui-qrcode-scanner-result">
             <strong>Last scan:</strong> {{ lastResult }}
         </div>
 
-        <!-- Error display -->
         <div v-if="errorMessage" class="ui-qrcode-scanner-error">
             {{ errorMessage }}
         </div>
@@ -60,7 +56,7 @@ export default {
     name: 'UIQrCodeScanner',
     inject: ['$socket', '$dataTracker'],
     props: {
-        /* Do not remove – Dashboard's Layout Manager passes these. */
+        /* do not remove entries from this - Dashboard's Layout Manager will pass this data to your component */
         id: { type: String, required: true },
         props: { type: Object, default: () => ({}) },
         state: { type: Object, default: () => ({ enabled: false, visible: false }) }
@@ -82,6 +78,8 @@ export default {
         readerId () {
             return `qrcode-reader-${this.id}`
         },
+        // All properties use the globally provided getProperty() from Dashboard 2,
+        // which automatically checks both props and state (runtime overrides).
         fps () {
             const v = Number(this.getProperty('fps'))
             return Number.isFinite(v) && v > 0 ? v : 10
@@ -127,14 +125,13 @@ export default {
         }
     },
     created () {
-        // Register input/load/dynamic-property handlers with Dashboard 2
         this.$dataTracker(this.id, this.onInput, this.onLoad, this.onDynamicProperties)
     },
     async mounted () {
-        // Defer until the reader div is in the DOM
         await this.$nextTick()
-        // On redeploy the DOM node may survive unmount; clear any leftover video elements
-        // that html5-qrcode injected in a previous mount cycle to prevent duplicates.
+        if (this.html5QrCode) {
+            await this.cleanup()
+        }
         const container = document.getElementById(this.readerId)
         if (container) {
             container.innerHTML = ''
@@ -161,7 +158,6 @@ export default {
             }
             this.ready = true
         } catch (err) {
-            // getCameras failed – we can still try facingMode-based start
             this.ready = true
             // eslint-disable-next-line no-console
             console.warn('[ui-qrcode-scanner] getCameras failed:', err)
@@ -190,7 +186,6 @@ export default {
                 config.aspectRatio = this.aspectRatio
             }
 
-            // Prefer an explicit deviceId when we have one, otherwise fall back to facingMode
             const cameraConfig = this.selectedCameraId
                 ? { deviceId: { exact: this.selectedCameraId } }
                 : { facingMode: this.facingMode }
@@ -300,54 +295,25 @@ export default {
                 action = msg.payload
             }
             switch (action) {
-                case 'start':
-                    this.start()
-                    break
-                case 'stop':
-                    this.stop()
-                    break
-                case 'toggle':
-                    if (this.scanning) {
-                        this.stop()
-                    } else {
-                        this.start()
-                    }
-                    break
-                case 'torchOn':
-                    if (!this.torchOn) {
-                        this.toggleTorch()
-                    }
-                    break
-                case 'torchOff':
-                    if (this.torchOn) {
-                        this.toggleTorch()
-                    }
-                    break
-                default:
-                    break
+                case 'start': this.start(); break
+                case 'stop': this.stop(); break
+                case 'toggle': this.scanning ? this.stop() : this.start(); break
+                case 'torchOn': if (!this.torchOn) { this.toggleTorch() } break
+                case 'torchOff': if (this.torchOn) { this.toggleTorch() } break
+                default: break
             }
         },
-        onLoad (_msg, _state) {
-            // Nothing extra to do on load – dynamic props are applied via state.
-        },
+        onLoad (_msg, _state) {},
         onDynamicProperties (msg) {
             const updates = msg && msg.ui_update
             if (!updates) {
                 return
             }
+            // use the globally provided setDynamicProperties() from Dashboard 2
             const allowed = [
-                'fps',
-                'qrboxWidth',
-                'qrboxHeight',
-                'aspectRatio',
-                'cameraFacingMode',
-                'autoStart',
-                'stopOnScan',
-                'hideControls',
-                'showTorch',
-                'disableFlip',
-                'startLabel',
-                'stopLabel'
+                'fps', 'qrboxWidth', 'qrboxHeight', 'aspectRatio', 'cameraFacingMode',
+                'autoStart', 'stopOnScan', 'hideControls', 'showTorch', 'disableFlip',
+                'startLabel', 'stopLabel'
             ]
             const changes = {}
             for (const key of allowed) {
