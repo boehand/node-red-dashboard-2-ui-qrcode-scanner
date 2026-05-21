@@ -21,9 +21,8 @@
         "url": "https://github.com/boehand/node-red-contrib-html5-qrcode-scanner.git"
     },
     "license": "Apache-2.0",
-    "author": {
-        "name": "boehand"
-    },
+    "author": "boehand",
+    "organization": "STFI, Chemnitz (Germany)",
     "exports": {
         "import": "./resources/ui-qrcode-scanner.esm.js",
         "require": "./resources/ui-qrcode-scanner.umd.js"
