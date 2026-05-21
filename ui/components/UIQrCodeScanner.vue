@@ -7,24 +7,17 @@
         </div>
 
         <div v-if="!hideControls" class="ui-qrcode-scanner-controls">
+            <!-- Single button that toggles between start/stop -->
             <v-btn
-                v-if="!scanning"
-                color="primary"
-                prepend-icon="mdi-camera"
-                :disabled="!ready"
-                @click="start"
+                :color="scanning ? 'error' : 'primary'"
+                :prepend-icon="scanning ? 'mdi-stop' : 'mdi-camera'"
+                :disabled="!ready && !scanning"
+                @click="scanning ? stop() : start()"
             >
-                {{ startLabel }}
-            </v-btn>
-            <v-btn
-                v-else
-                color="error"
-                prepend-icon="mdi-stop"
-                @click="stop"
-            >
-                {{ stopLabel }}
+                {{ scanning ? stopLabel : startLabel }}
             </v-btn>
 
+            <!-- Camera selector - only shown when not scanning -->
             <v-select
                 v-if="cameras.length > 1 && !scanning"
                 v-model="selectedCameraId"
@@ -37,6 +30,7 @@
                 variant="outlined"
             />
 
+            <!-- Torch button - only shown when scanning if supported -->
             <v-btn
                 v-if="scanning && showTorch && torchSupported"
                 :color="torchOn ? 'warning' : undefined"
@@ -47,10 +41,12 @@
             </v-btn>
         </div>
 
+        <!-- Result display -->
         <div v-if="lastResult" class="ui-qrcode-scanner-result">
             <strong>Last scan:</strong> {{ lastResult }}
         </div>
 
+        <!-- Error display -->
         <div v-if="errorMessage" class="ui-qrcode-scanner-error">
             {{ errorMessage }}
         </div>
@@ -137,6 +133,12 @@ export default {
     async mounted () {
         // Defer until the reader div is in the DOM
         await this.$nextTick()
+        // On redeploy the DOM node may survive unmount; clear any leftover video elements
+        // that html5-qrcode injected in a previous mount cycle to prevent duplicates.
+        const container = document.getElementById(this.readerId)
+        if (container) {
+            container.innerHTML = ''
+        }
         try {
             this.html5QrCode = new Html5Qrcode(this.readerId, { verbose: false })
         } catch (err) {
