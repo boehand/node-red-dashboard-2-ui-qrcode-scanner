@@ -15,11 +15,13 @@ module.exports = function (RED) {
             'qrboxHeight',
             'aspectRatio',
             'cameraFacingMode',
+            'cameraIndex',
             'autoStart',
             'stopOnScan',
             'hideControls',
             'showTorch',
             'disableFlip',
+            'hideLastResult',
             'startLabel',
             'stopLabel'
         ]

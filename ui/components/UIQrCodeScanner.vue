@@ -1,10 +1,11 @@
 <template>
     <div class="ui-qrcode-scanner-wrapper">
-        <!-- html5-qrcode owns this div entirely – no Vue children inside -->
-        <div :id="readerId" class="ui-qrcode-scanner-reader"></div>
-
-        <div v-if="!scanning && !errorMessage" class="ui-qrcode-scanner-placeholder">
-            Scanner stopped
+        <div class="ui-qrcode-scanner-video-area">
+            <!-- html5-qrcode owns this div entirely – no Vue children inside -->
+            <div :id="readerId" class="ui-qrcode-scanner-reader"></div>
+            <div v-if="!scanning && !errorMessage" class="ui-qrcode-scanner-placeholder">
+                Scanner stopped
+            </div>
         </div>
 
         <div v-if="!hideControls" class="ui-qrcode-scanner-controls">
@@ -18,7 +19,7 @@
             </v-btn>
 
             <v-select
-                v-if="cameras.length > 1 && !scanning"
+                v-if="cameras.length > 1"
                 v-model="selectedCameraId"
                 :items="cameraOptions"
                 item-title="title"
@@ -39,7 +40,7 @@
             </v-btn>
         </div>
 
-        <div v-if="lastResult" class="ui-qrcode-scanner-result">
+        <div v-if="lastResult && !hideLastResult" class="ui-qrcode-scanner-result">
             <strong>Last scan:</strong> {{ lastResult }}
         </div>
 
@@ -51,6 +52,13 @@
 
 <script>
 import { Html5Qrcode } from 'html5-qrcode'
+
+// Module-level registry: tracks the active Html5Qrcode scanner per readerId.
+// Dashboard 2 does not restart the Vue app on Node-RED redeploy, so mounted()
+// can fire for a new instance while the old one is still alive (beforeUnmount
+// was never called). We only store the scanner object – never the Vue instance –
+// to avoid touching another component's managed DOM during Vue's patch cycle.
+const _scanners = new Map()
 
 export default {
     name: 'UIQrCodeScanner',
@@ -99,6 +107,13 @@ export default {
         facingMode () {
             return this.getProperty('cameraFacingMode') || 'environment'
         },
+        cameraIndex () {
+            const v = Number(this.getProperty('cameraIndex'))
+            return Number.isInteger(v) && v >= 0 ? v : 0
+        },
+        hideLastResult () {
+            return !!this.getProperty('hideLastResult')
+        },
         autoStart () {
             return this.getProperty('autoStart') !== false
         },
@@ -124,13 +139,30 @@ export default {
             return this.cameras.map((c) => ({ value: c.id, title: c.label || c.id }))
         }
     },
+    watch: {
+        async selectedCameraId (newId, oldId) {
+            if (newId !== oldId && this.scanning) {
+                await this.stop()
+                await this.start()
+            }
+            if (newId && oldId !== null && !this.hideControls) {
+                this.saveCameraCookie(newId)
+            }
+        }
+    },
     created () {
         this.$dataTracker(this.id, this.onInput, this.onLoad, this.onDynamicProperties)
     },
     async mounted () {
         await this.$nextTick()
-        if (this.html5QrCode) {
-            await this.cleanup()
+        // Stop any orphaned Html5Qrcode scanner left over from a previous mount
+        // cycle. We only touch the scanner object, not the old Vue component,
+        // so Vue's virtual DOM stays consistent and __vnode errors are avoided.
+        const prevScanner = _scanners.get(this.readerId)
+        if (prevScanner) {
+            try { await prevScanner.stop() } catch (_) {}
+            try { await prevScanner.clear() } catch (_) {}
+            _scanners.delete(this.readerId)
         }
         const container = document.getElementById(this.readerId)
         if (container) {
@@ -138,6 +170,7 @@ export default {
         }
         try {
             this.html5QrCode = new Html5Qrcode(this.readerId, { verbose: false })
+            _scanners.set(this.readerId, this.html5QrCode)
         } catch (err) {
             this.errorMessage = `Failed to initialise scanner: ${err && err.message ? err.message : err}`
             return
@@ -147,14 +180,34 @@ export default {
             const cams = await Html5Qrcode.getCameras()
             this.cameras = Array.isArray(cams) ? cams : []
             if (this.cameras.length > 0) {
-                const preferRear = this.facingMode === 'environment'
-                const match = this.cameras.find((c) => {
-                    const label = (c.label || '').toLowerCase()
-                    return preferRear
-                        ? /back|rear|environment/.test(label)
-                        : /front|user|face/.test(label)
-                })
-                this.selectedCameraId = match ? match.id : this.cameras[0].id
+                let selected = null
+
+                if (!this.hideControls) {
+                    const savedId = this.loadCameraCookie()
+                    if (savedId && this.cameras.some((c) => c.id === savedId)) {
+                        selected = savedId
+                    }
+                }
+
+                if (!selected) {
+                    const idx = this.cameraIndex
+                    if (idx > 0 && this.cameras.length >= idx) {
+                        selected = this.cameras[idx - 1].id
+                    }
+                }
+
+                if (!selected) {
+                    const preferRear = this.facingMode === 'environment'
+                    const match = this.cameras.find((c) => {
+                        const label = (c.label || '').toLowerCase()
+                        return preferRear
+                            ? /back|rear|environment/.test(label)
+                            : /front|user|face/.test(label)
+                    })
+                    selected = match ? match.id : this.cameras[0].id
+                }
+
+                this.selectedCameraId = selected
             }
             this.ready = true
         } catch (err) {
@@ -168,6 +221,7 @@ export default {
         }
     },
     async beforeUnmount () {
+        _scanners.delete(this.readerId)
         await this.cleanup()
     },
     methods: {
@@ -177,9 +231,20 @@ export default {
             }
             this.errorMessage = null
 
+            const readerId = this.readerId
             const config = {
                 fps: this.fps,
-                qrbox: { width: this.qrboxWidth, height: this.qrboxHeight },
+                // viewfinderWidth/Height from html5-qrcode is the camera resolution,
+                // not the CSS container size – so we read the container from the DOM.
+                qrbox: () => {
+                    const el = document.getElementById(readerId)
+                    const w = el ? el.clientWidth : 300
+                    // clientHeight may be 0 before the video fills the container;
+                    // fall back to the 4:3 ratio of the width.
+                    const h = el && el.clientHeight > 0 ? el.clientHeight : w * 0.75
+                    const size = Math.max(50, Math.floor(Math.min(w, h) * 0.8))
+                    return { width: size, height: size }
+                },
                 disableFlip: this.disableFlip
             }
             if (this.aspectRatio) {
@@ -222,6 +287,7 @@ export default {
             if (!this.html5QrCode) {
                 return
             }
+            _scanners.delete(this.readerId)
             try {
                 if (this.scanning) {
                     await this.html5QrCode.stop()
@@ -304,6 +370,18 @@ export default {
             }
         },
         onLoad (_msg, _state) {},
+        saveCameraCookie (cameraId) {
+            try {
+                const expires = new Date(Date.now() + 365 * 864e5).toUTCString()
+                document.cookie = `nrdb-qrs-cam=${encodeURIComponent(cameraId)}; expires=${expires}; path=/; SameSite=Lax`
+            } catch (_) {}
+        },
+        loadCameraCookie () {
+            try {
+                const part = document.cookie.split('; ').find((p) => p.startsWith('nrdb-qrs-cam='))
+                return part ? decodeURIComponent(part.split('=')[1]) : null
+            } catch (_) { return null }
+        },
         onDynamicProperties (msg) {
             const updates = msg && msg.ui_update
             if (!updates) {
@@ -312,8 +390,8 @@ export default {
             // use the globally provided setDynamicProperties() from Dashboard 2
             const allowed = [
                 'fps', 'qrboxWidth', 'qrboxHeight', 'aspectRatio', 'cameraFacingMode',
-                'autoStart', 'stopOnScan', 'hideControls', 'showTorch', 'disableFlip',
-                'startLabel', 'stopLabel'
+                'cameraIndex', 'autoStart', 'stopOnScan', 'hideControls', 'showTorch',
+                'disableFlip', 'hideLastResult', 'startLabel', 'stopLabel'
             ]
             const changes = {}
             for (const key of allowed) {

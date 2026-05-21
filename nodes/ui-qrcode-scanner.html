@@ -26,8 +26,10 @@
             autoStart: { value: true },
             stopOnScan: { value: false },
             hideControls: { value: false },
+            cameraIndex: { value: 0 },
             showTorch: { value: false },
             disableFlip: { value: false },
+            hideLastResult: { value: false },
             startLabel: { value: 'Start scanning' },
             stopLabel: { value: 'Stop scanning' }
         },
@@ -44,6 +46,12 @@
                 height: '#node-input-height',
                 group: '#node-input-group'
             })
+            function toggleCameraIndex () {
+                const hidden = $('#node-input-hideControls').prop('checked')
+                $('#node-input-cameraIndex').closest('.form-row').toggle(hidden)
+            }
+            $('#node-input-hideControls').on('change', toggleCameraIndex)
+            toggleCameraIndex()
         }
     })
 </script>
@@ -111,6 +119,19 @@
         </label>
     </div>
     <div class="form-row">
+        <label for="node-input-cameraIndex"><i class="fa fa-camera"></i> Camera #</label>
+        <select id="node-input-cameraIndex" style="width:70%">
+            <option value="0">Auto (facing mode)</option>
+            <option value="1">Camera 1</option>
+            <option value="2">Camera 2</option>
+            <option value="3">Camera 3</option>
+            <option value="4">Camera 4</option>
+        </select>
+        <div style="margin-top:4px; font-size:0.8em; color:#888; padding-left:105px">
+            The camera sequence—and thus the number—is determined by the operating system.
+        </div>
+    </div>
+    <div class="form-row">
         <label for="node-input-showTorch" style="width:auto">
             <input type="checkbox" id="node-input-showTorch" style="display:inline-block; width:auto; vertical-align:top; margin-right:4px;">
             Show torch toggle (if supported)
@@ -120,6 +141,12 @@
         <label for="node-input-disableFlip" style="width:auto">
             <input type="checkbox" id="node-input-disableFlip" style="display:inline-block; width:auto; vertical-align:top; margin-right:4px;">
             Disable mirrored scanning (disableFlip)
+        </label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-hideLastResult" style="width:auto">
+            <input type="checkbox" id="node-input-hideLastResult" style="display:inline-block; width:auto; vertical-align:top; margin-right:4px;">
+            Hide "Last scan" result display
         </label>
     </div>
 
