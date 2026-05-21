@@ -1,21 +1,12 @@
 # node-red-dashboard-2-ui-qrcode-scanner
 
 A QR-code / barcode scanner widget for [Node-RED Dashboard 2.0](https://dashboard.flowfuse.com/),
-based on the popular [html5-qrcode](https://github.com/mebjas/html5-qrcode) lib.
-
-![Demo](docs/video_node-red-dashboard-2-ui-qrcode-scanner.webp)
-
-> **Note on the package name:** Dashboard 2.0 only auto-detects third-party
-> widgets whose npm package name contains `node-red-dashboard-2-`
-> (see [`getThirdPartyWidgets`](https://github.com/FlowFuse/node-red-dashboard/blob/main/nodes/utils/index.js)).
-> The npm package is therefore published as
-> `node-red-dashboard-2-ui-qrcode-scanner`, even though the GitHub repo is
-> `node-red-contrib-html5-qrcode-scanner`.
-
-The widget renders a live camera preview inside a Dashboard 2.0 group and emits a
+based on the popular [html5-qrcode](https://github.com/mebjas/html5-qrcode) lib. The widget renders a live camera preview inside a Dashboard 2.0 group and emits a
 Node-RED message every time a code is decoded.
 
 ![type:ui-qrcode-scanner](https://img.shields.io/badge/widget-ui--qrcode--scanner-blue)
+
+![Demo](docs/video_node-red-dashboard-2-ui-qrcode-scanner.webp)
 
 ## Features
 
