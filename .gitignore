@@ -8,3 +8,4 @@ resources/*.map
 .vscode/
 docs/video1.mp4
 docs/video2.mp4
+.claude/settings.json
