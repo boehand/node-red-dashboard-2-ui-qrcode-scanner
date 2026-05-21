@@ -1,7 +1,7 @@
 # node-red-dashboard-2-ui-qrcode-scanner
 
 A QR-code / barcode scanner widget for [Node-RED Dashboard 2.0](https://dashboard.flowfuse.com/),
-powered by [html5-qrcode](https://github.com/mebjas/html5-qrcode).
+based on the popular [html5-qrcode](https://github.com/mebjas/html5-qrcode) lib.
 
 ![Demo](docs/video_node-red-dashboard-2-ui-qrcode-scanner.webp)
 
