@@ -136,6 +136,10 @@ npm run build
 The build emits `resources/ui-qrcode-scanner.umd.js`, which Dashboard 2.0
 loads automatically.
 
+## Author
+
+Created by boehand using Claude Sonnet 4.6
+
 ## License
 
 Apache-2.0 – see [LICENSE](LICENSE).
