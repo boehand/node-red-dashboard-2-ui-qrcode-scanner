@@ -10,7 +10,7 @@ Node-RED message every time a code is decoded.
 
 > **Please note:** 
 > - HTTPS (or http://localhost like in the example) is required for camera access. Mobile browsers do not enable the camera when using plain HTTP.
-> - There is, however, a workaround available via Chrome Flags (chrome://flags/#unsafely-treat-insecure-origin-as-secure) or Edge Flags (edge://flags/#unsafely-treat-insecure-origin-as-secure). These flags allow you to declare insecure URLs as secure, thereby enabling camera access.
+> - There is a workaround available via Chrome Flags (chrome://flags/#unsafely-treat-insecure-origin-as-secure) or Edge Flags (edge://flags/#unsafely-treat-insecure-origin-as-secure). These flags allow you to declare insecure URLs as secure, thereby enabling camera access.
 > - However, this approach is recommended only during the development phase. In a production environment, Node-RED should be operated in HTTPS mode. This requires an appropriate HTTPS certificate, which is typically provided by the IT department.
 
 ## Features
