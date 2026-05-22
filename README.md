@@ -8,6 +8,11 @@ Node-RED message every time a code is decoded.
 
 ![Demo](docs/video_node-red-dashboard-2-ui-qrcode-scanner.webp)
 
+> **Please note:** 
+> - HTTPS (or http://localhost like in the example) is required for camera access. Mobile browsers do not enable the camera when using plain HTTP.
+> - There is, however, a workaround available via Chrome Flags (chrome://flags/#unsafely-treat-insecure-origin-as-secure) or Edge Flags (edge://flags/#unsafely-treat-insecure-origin-as-secure). These flags allow you to declare insecure URLs as secure, thereby enabling camera access.
+> - However, this approach is recommended only during the development phase. In a production environment, Node-RED should be operated in HTTPS mode. This requires an appropriate HTTPS certificate, which is typically provided by the IT department.
+
 ## Features
 
 - Works with QR codes plus every other format supported by `html5-qrcode`
@@ -50,9 +55,6 @@ scans for. If you previously installed the package under the
 `node-red-contrib-html5-qrcode-scanner` name, uninstall it first
 (`npm uninstall node-red-contrib-html5-qrcode-scanner`) or the widget
 will continue to fall back to `ui-template`.
-
-> **Camera access requires HTTPS** (or `http://localhost`). Mobile browsers will
-> not enable the camera on plain HTTP from a LAN address.
 
 ## Outputs
 
