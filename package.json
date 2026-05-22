@@ -1,7 +1,7 @@
 {
     "name": "@stfi/node-red-dashboard-2-ui-qrcode-scanner",
-    "version": "1.0.3",
-    "description": "A QR-Code / Barcode scanner widget for Node-RED Dashboard 2.0, powered by html5-qrcode.",
+    "version": "1.0.4",
+    "description": "A QR-Code / Barcode scanner widget for Node-RED Dashboard 2.0, based on the popular html5-qrcode lib.",
     "keywords": [
         "node-red",
         "node-red-dashboard-2",
